@@ -1,0 +1,53 @@
+version: '3.1'
+
+services:
+  # Wordpress Blog
+  wordpress:
+    depends_on:
+      - wordpressdb
+    image: wordpress:latest
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: wordpressdb
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./wordpress/:/var/www/html
+    networks:
+      - wordpressnetwork
+  # MySQL Database
+  wordpressdb:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Europe/Berlin
+    ports:
+      - 3306:3306
+    volumes:
+      - wordpressdb:/var/lib/mysql
+    networks:
+      - wordpressnetwork
+  # Adminer
+  adminerwordpress:
+    image: adminer:latest
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - wordpressnetwork
+    links:
+      - wordpressdb
+    environment:
+      ADMINER_DEFAULT_SERVER: wordpressdb
+
+networks:
+  wordpressnetwork:
+volumes:
+  wordpressdb:
